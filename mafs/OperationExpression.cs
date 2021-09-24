@@ -6,36 +6,31 @@ namespace Mafs
 {
     public class OperationExpression : Expression
     {
-        public char Operation { get;private set; }
+        public char Value { get; private set; }
         public override async Task Write(TextWriter w)
         {
             await w.WriteAsync('+');
         }
-        public override bool CanBeFirst => Operation == '+' || Operation == '-';
+        public override bool CanBeFirst => Value == '+' || Value == '-';
 
         public override bool IsValid => true;
 
-        internal override bool CanBeFollowedBy(Expression ex)
+        internal override bool CanBeFollowedBy(Expression? ex)
         {
-            switch (ex)
+            return ex switch
             {
-                case OperationExpression op:
-                    return (Operation == '+' || Operation == '-') && (op.Operation == '+' || op.Operation == '-');
-                case BracketExpression:
-                case NumberExpression:
-                    return true;
-                case null:
-                default:
-                    return false;
-            }
+                OperationExpression op => op.Value == '+' || op.Value == '-',
+                BracketExpression or NumberExpression => true,
+                _ => false,
+            };
         }
         internal override void Initialize(ExpressionParser p)
         {
-            if(p.CurrentChar != '+' && p.CurrentChar != '-' && p.CurrentChar != '*' && p.CurrentChar != '/')
+            if (p.CurrentChar != '+' && p.CurrentChar != '-' && p.CurrentChar != '*' && p.CurrentChar != '/')
             {
                 throw new InvalidOperationException($"{nameof(p.CurrentChar)} must be one of [+, -, *, /].");
             }
-            Operation = p.CurrentChar;
+            Value = p.CurrentChar;
             p.Advance();
         }
     }

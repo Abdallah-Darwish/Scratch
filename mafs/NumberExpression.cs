@@ -21,36 +21,32 @@ namespace Mafs
 
         internal override bool CanBeFollowedBy(Expression ex)
         {
-            switch (ex)
+            return ex switch
             {
-                case null:
-                case OperationExpression:
-                return true;
-                case NumberExpression:
-                case BracketExpression:
-                default:
-                    return false;
-            }
+                null or OperationExpression => true,
+                _ => false,
+            };
         }
 
         internal override void Initialize(ExpressionParser p)
         {
-            if(char.IsNumber(p.CurrentChar))
+            if (!char.IsNumber(p.CurrentChar))
             {
                 throw new InvalidOperationException($"{p.CurrentChar} must be a digit.");
             }
             StringBuilder sb = new();
             bool dotSeen = false;
-            while(char.IsNumber(p.CurrentChar) || (!dotSeen && p.CurrentChar == '.'))
+            while (char.IsNumber(p.CurrentChar) || (!dotSeen && p.CurrentChar == '.'))
             {
                 dotSeen = p.CurrentChar == '.';
                 sb.Append(p.CurrentChar);
-                p.Advance();
+                p.Advance(false);
             }
-            if(p.CurrentChar == '.')
+            if (p.CurrentChar == '.')
             {
                 throw new InvalidExpressionException("A dot was encounterd more than once in a number");
             }
+            Value = double.Parse(sb.ToString());
         }
     }
 }
