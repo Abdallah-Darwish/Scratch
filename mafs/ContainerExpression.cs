@@ -30,7 +30,8 @@ namespace Mafs
                 {
                     if (!_subExpressions[i].CanBeFollowedBy(_subExpressions[i + 1])) { return false; }
                 }
-                return _subExpressions.Last().CanBeFollowedBy(null);
+                if (!_subExpressions.Last().CanBeFollowedBy(null)) { return false; }
+                return _subExpressions.All(exp => exp.IsValid);
             }
         }
 
