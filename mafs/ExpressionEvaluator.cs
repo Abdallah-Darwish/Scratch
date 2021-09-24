@@ -46,10 +46,9 @@ namespace Mafs
             {
                 expNode.Value.Result = numExp.Value;
             }
-            else if (expNode.Value.Expression is ContainerExpression bExp)
+            else if (expNode.Value.Expression is ContainerExpression)
             {
-                ExpressionEvaluator evaluator = new(bExp);
-                expNode.Value.Result = evaluator.Value;
+                EvaluateBracket(expNode);
             }
         }
         private void EvaluateOperation(LinkedListNode<ExpressionEvaluationResult> opNode)
@@ -73,8 +72,21 @@ namespace Mafs
                 _ => double.NaN
             };
         }
+        private void EvaluateBracket(LinkedListNode<ExpressionEvaluationResult> bNode)
+        {
+            ExpressionEvaluator evaluator = new((bNode.Value.Expression as ContainerExpression)!);
+            bNode.Value.Result = evaluator.Value;
+        }
         private void Evaluate()
         {
+            //0- Evaluate brackets
+            for (LinkedListNode<ExpressionEvaluationResult>? nd = _subExpressions.First; nd != null; nd = nd!.Next)
+            {
+                if (nd.Value.Expression is BracketExpression)
+                {
+                    EvaluateBracket(nd);
+                }
+            }
             //1- Evalute numbers signs
             for (LinkedListNode<ExpressionEvaluationResult>? nd = _subExpressions.First; nd != null; nd = nd!.Next)
             {
